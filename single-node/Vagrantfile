@@ -3,12 +3,29 @@
 
 require 'fileutils'
 require 'open-uri'
+require 'rbconfig'
 require 'tempfile'
 require 'yaml'
 
 Vagrant.require_version ">= 1.6.0"
 
 $update_channel = "alpha"
+
+$os ||= (
+  host_os = RbConfig::CONFIG['host_os']
+  case host_os
+  when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
+    :windows
+  when /darwin|mac os/
+    :macosx
+  when /linux/
+    :linux
+  when /solaris|bsd/
+    :unix
+  else
+    :unknown
+  end
+)
 
 CLUSTER_IP="10.3.0.1"
 NODE_IP = "172.17.4.99"
@@ -17,9 +34,16 @@ NODE_MEMORY_SIZE = 2048
 USER_DATA_PATH = File.expand_path("user-data")
 SSL_TARBALL_PATH = File.expand_path("ssl/controller.tar")
 
-system("mkdir -p ssl && ./../lib/init-ssl-ca ssl") or abort ("failed generating SSL CA artifacts")
-system("./../lib/init-ssl ssl apiserver controller IP.1=#{NODE_IP},IP.2=#{CLUSTER_IP}") or abort ("failed generating SSL certificate artifacts")
-system("./../lib/init-ssl ssl admin kube-admin") or abort("failed generating admin SSL artifacts")
+# Generate root CA and admin key/cert
+if $os == :windows then
+  system("mkdir ssl > NUL 2>&1 & ..\\lib\\init-ssl-ca.cmd ssl") or abort ("failed generating SSL CA artifacts")
+  system("..\\lib\\init-ssl.cmd ssl apiserver controller \"IP.1=#{NODE_IP},IP.2=#{CLUSTER_IP}\"") or abort ("failed generating SSL certificate artifacts")
+  system("..\\lib\\init-ssl.cmd ssl admin kube-admin") or abort("failed generating admin SSL artifacts")
+else
+  system("mkdir -p ssl && ./../lib/init-ssl-ca ssl") or abort ("failed generating SSL CA artifacts")
+  system("./../lib/init-ssl ssl apiserver controller IP.1=#{NODE_IP},IP.2=#{CLUSTER_IP}") or abort ("failed generating SSL certificate artifacts")
+  system("./../lib/init-ssl ssl admin kube-admin") or abort("failed generating admin SSL artifacts")
+end
 
 Vagrant.configure("2") do |config|
   # always use Vagrant's insecure key
