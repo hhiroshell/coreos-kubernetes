@@ -1,3 +1,19 @@
+# Kubernetes on CoreOS Container Linux on Windows VirtualBox
+
+This repo is forked from the [Kubernetes on CoreOS Container Linux](https://github.com/coreos/coreos-kubernetes) to make Kubernetes installers for VirtualBox on _Windows_.
+(The readme contnet from original one follows this section.)
+
+This project supports installers only for:
+
+- Single/Multi node(s) cluster on VirtualBox on Windows, utilizing Vagrant.
+
+If you are looking for installer for other environments, see the [original project](https://github.com/coreos/coreos-kubernetes).
+
+Now a Kubernetes's function [Kubelet TLS Bootstrap #43](https://github.com/kubernetes/features/issues/43) is on work, and release of this feature will remove the root cause of why we need another project for Windows environment.
+So this project will be depricated when the function is released and the original projects supports installation for Windows environments.
+
+--- (The original readme is below...) ---
+
 # Kubernetes on CoreOS Container Linux
 
 This repo contains tooling and documentation around deploying Kubernetes using CoreOS Container Linux.
